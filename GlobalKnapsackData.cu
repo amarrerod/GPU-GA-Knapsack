@@ -56,8 +56,6 @@ TGlobalKnapsackData::~TGlobalKnapsackData(){
     
 }// end of TGlobalKnapsackData
 //------------------------------------------------------------------------------
-    
-
 
 /*
  * Load data from file, filename given in Parameter class
@@ -73,13 +71,13 @@ void TGlobalKnapsackData::LoadFromFile(){
         cerr << ERROR_FILE_NOT_FOUND << endl; 
         exit(1);
     }
- 
-    
-    // Read number of items
-    int NumberOfItems = 0;    
-    fr >>NumberOfItems;
-    
+   
+    // Read number of items and capacity
+    int NumberOfItems = 0;
+    int capacity = 0;
+    fr >> NumberOfItems >> capacity;
     int OriginalNumberOfItems = NumberOfItems;
+
     
     // Calculate padding
     int Overhead = NumberOfItems % (Params->IntBlockSize() * WARP_SIZE);
@@ -87,49 +85,32 @@ void TGlobalKnapsackData::LoadFromFile(){
     
     // Allocate memory for arrays
     AllocateMemory(NumberOfItems);
-        
     HostData->NumberOfItems         = NumberOfItems;
     HostData->OriginalNumberOfItems = OriginalNumberOfItems;
     
-    
-    
-    // Load prices
+    // Load profits
     for (size_t i = 0; i < OriginalNumberOfItems; i++){
-        fr >> HostData->ItemPrice[i];    
+        fr >> HostData->ItemPrice[i] >> HostData->ItemWeight[i];    
                                    
-    }    // add padding
-    for (size_t i = OriginalNumberOfItems; i < NumberOfItems; i++){
-        HostData->ItemPrice[i] = TPriceType(0);                       
-    }
-
-    
-    
-    // Load weights 
-    for (size_t i = 0; i < OriginalNumberOfItems; i++){
-        fr >> HostData->ItemWeight[i];
     } // add padding
     for (size_t i = OriginalNumberOfItems; i < NumberOfItems; i++){
+        HostData->ItemPrice[i] = TPriceType(0);
         HostData->ItemWeight[i] = TPriceType(0);        
-    }
-    
-    
+       }
+
     // Get max Price/Weight ratio
     HostData->MaxPriceWightRatio = 0.0f;
     
     for (size_t i = 0; i < OriginalNumberOfItems; i++){
-        if (HostData->ItemWeight[i] != 0) {
+       if (HostData->ItemWeight[i] != 0) {
                 float Ratio = HostData->ItemPrice[i] / HostData->ItemWeight[i];
                 if (Ratio > HostData->MaxPriceWightRatio)  HostData->MaxPriceWightRatio = Ratio;
-        }
-        
+       } 
     }
-    
-    //Read Knapsack capacity
-    fr >> HostData->KnapsackCapacity;
-    
+    //Store Knapsack capacity
+    HostData->KnapsackCapacity = capacity;
     // Update chromosome size in parameters
-    Params->SetChromosomeSize(NumberOfItems/Params->IntBlockSize());
-    
+    Params->SetChromosomeSize(NumberOfItems / Params->IntBlockSize());
     
     // Upload gloal data to device memory
     UploadDataToDevice();
@@ -137,8 +118,7 @@ void TGlobalKnapsackData::LoadFromFile(){
     
 }// end of LoadFromFile
 //------------------------------------------------------------------------------
-    
-    
+
     
 //----------------------------------------------------------------------------//
 //                           protected methods                                //
@@ -150,42 +130,20 @@ void TGlobalKnapsackData::LoadFromFile(){
  * @param       NumberOfItems - Number of Items in Knapsack with padding
  */
 void TGlobalKnapsackData::AllocateMemory(int NumberOfItems){
-    
-    
+
     //------------------------- Host allocation ------------------------------//    
     //------------------- All data allocated by PINNED memory ----------------//
-    checkCudaErrors(
-           cudaHostAlloc((void**)&HostData,  sizeof(TKnapsackData), cudaHostAllocDefault)
-           );		
-    
-    checkCudaErrors(
-           cudaHostAlloc((void**)&HostData->ItemPrice,  sizeof(TPriceType) * NumberOfItems, cudaHostAllocDefault)
-           );		
-    
-    checkCudaErrors(
-           cudaHostAlloc((void**)&HostData->ItemWeight,  sizeof(TWeightType)* NumberOfItems, cudaHostAllocDefault)
-           );		
-    
-    
-    
-    
-    //----------------------- Device allocation ------------------------------//    
-    checkCudaErrors(
-           cudaMalloc((void**)&(DeviceData),  sizeof(TKnapsackData) )
-           );		
-            
-    checkCudaErrors(
-           cudaMalloc((void**)&(FDeviceItemPriceHandler),  sizeof(TPriceType) * NumberOfItems)
-           );		
+    checkCudaErrors(cudaHostAlloc((void**)&HostData,  sizeof(TKnapsackData), cudaHostAllocDefault));		
+    checkCudaErrors(cudaHostAlloc((void**)&HostData->ItemPrice,  sizeof(TPriceType) * NumberOfItems, cudaHostAllocDefault));		
+    checkCudaErrors(cudaHostAlloc((void**)&HostData->ItemWeight,  sizeof(TWeightType)* NumberOfItems, cudaHostAllocDefault));		
         
-    checkCudaErrors(
-           cudaMalloc((void**)&(FDeviceItemWeightHandler),  sizeof(TWeightType) * NumberOfItems)
-           );		
-            
-    
+    //----------------------- Device allocation ------------------------------//    
+    checkCudaErrors(cudaMalloc((void**)&(DeviceData),  sizeof(TKnapsackData)));		
+    checkCudaErrors(cudaMalloc((void**)&(FDeviceItemPriceHandler),  sizeof(TPriceType) * NumberOfItems));		
+    checkCudaErrors(cudaMalloc((void**)&(FDeviceItemWeightHandler),  sizeof(TWeightType) * NumberOfItems));		
+               
 }// end of AllocateMemory
 //------------------------------------------------------------------------------
-
 
 /*
  * Free Memory
@@ -193,78 +151,41 @@ void TGlobalKnapsackData::AllocateMemory(int NumberOfItems){
 void TGlobalKnapsackData::FreeMemory(){
     
     //------------------------- Host allocation ------------------------------//        
-    checkCudaErrors(
-           cudaFreeHost(HostData->ItemPrice)
-           );		
-    
-    checkCudaErrors(
-           cudaFreeHost(HostData->ItemWeight)            
-           );		
-    
-    checkCudaErrors(
-           cudaFreeHost(HostData)
-           );		
-    
-    
-    
-    
+    checkCudaErrors(cudaFreeHost(HostData->ItemPrice));		
+    checkCudaErrors(cudaFreeHost(HostData->ItemWeight));		
+    checkCudaErrors(cudaFreeHost(HostData));		
     //----------------------- Device allocation ------------------------------//    
-    checkCudaErrors(
-           cudaFree(DeviceData)
-           );		
-        
-    checkCudaErrors(
-           cudaFree(FDeviceItemPriceHandler)
-           );		        
-    checkCudaErrors(
-           cudaFree(FDeviceItemWeightHandler)
-           );		        
+    checkCudaErrors(cudaFree(DeviceData));		
+    checkCudaErrors(cudaFree(FDeviceItemPriceHandler));		        
+    checkCudaErrors(cudaFree(FDeviceItemWeightHandler));		        
     
 }// end of AllocateMemory
 //------------------------------------------------------------------------------
-
-
 
 /*
  * Upload Data to Device
  */
 void TGlobalKnapsackData::UploadDataToDevice(){
-    
-    
+       
     // Copy basic structure - struct data
-    checkCudaErrors(
-         cudaMemcpy(DeviceData, HostData, sizeof(TKnapsackData), 
-                    cudaMemcpyHostToDevice)
-         );    
+    checkCudaErrors(cudaMemcpy(DeviceData, HostData, sizeof(TKnapsackData),
+                                                 cudaMemcpyHostToDevice));    
         
-    
     // Set pointer of the ItemPrice vector into the struct on GPU (link struct and vector)
-    checkCudaErrors(
-         cudaMemcpy(&(DeviceData->ItemPrice), &FDeviceItemPriceHandler, sizeof(TPriceType * ), 
-                    cudaMemcpyHostToDevice)
-         );    
+    checkCudaErrors(cudaMemcpy(&(DeviceData->ItemPrice), &FDeviceItemPriceHandler, 
+              sizeof(TPriceType * ), cudaMemcpyHostToDevice));    
     
-
     // Set pointer of the ItemWeight vector into struct on GPU (link struct and vector)
-    checkCudaErrors(
-         cudaMemcpy(&(DeviceData->ItemWeight), &FDeviceItemWeightHandler, sizeof(TWeightType * ), 
-                    cudaMemcpyHostToDevice)
-         );    
+    checkCudaErrors(cudaMemcpy(&(DeviceData->ItemWeight), &FDeviceItemWeightHandler, 
+              sizeof(TWeightType * ), cudaMemcpyHostToDevice));    
     
-    
-        
     // Copy prices 
-    checkCudaErrors(
-         cudaMemcpy(FDeviceItemPriceHandler, HostData->ItemPrice,  sizeof(TPriceType) * HostData->NumberOfItems, 
-                    cudaMemcpyHostToDevice)
-         );    
+    checkCudaErrors(cudaMemcpy(FDeviceItemPriceHandler, HostData->ItemPrice,  
+              sizeof(TPriceType) * HostData->NumberOfItems, cudaMemcpyHostToDevice));    
     
     // Copy weights 
-    checkCudaErrors(
-         cudaMemcpy(FDeviceItemWeightHandler, HostData->ItemWeight, sizeof(TWeightType) * HostData->NumberOfItems, 
-                    cudaMemcpyHostToDevice)
-         );    
+    checkCudaErrors(cudaMemcpy(FDeviceItemWeightHandler, HostData->ItemWeight, 
+              sizeof(TWeightType) * HostData->NumberOfItems, cudaMemcpyHostToDevice));    
   
-    
 }// end of UploadDataToDevice
 //------------------------------------------------------------------------------

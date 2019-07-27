@@ -85,14 +85,14 @@ void TParameters::LoadParametersFromCommandLine(int argc, char **argv){
    char c;
 
    // Parse command line 
-   while ((c = getopt (argc, argv, "p:g:m:c:o:f:s:bh")) != -1){
+   while ((c = getopt (argc, argv, "p:e:m:c:o:f:s:bh")) != -1){
        switch (c){
           case 'p':{              
               if (atoi(optarg) != 0) EvolutionParameters.PopulationSize = atoi(optarg);
               break;
           }
-          case 'g': {
-              if (atoi(optarg) != 0) EvolutionParameters.NumOfGenerations = atoi(optarg);
+          case 'e': {
+              if (atoi(optarg) != 0) EvolutionParameters.MaxEvaluations = atoi(optarg);
               break;
           }
   
@@ -178,7 +178,7 @@ TParameters::TParameters(){
     
     EvolutionParameters.PopulationSize      = 128;
     EvolutionParameters.ChromosomeSize      = 32;
-    EvolutionParameters.NumOfGenerations    = 100;
+    EvolutionParameters.MaxEvaluations      = 1e6;
         
     EvolutionParameters.MutationPst         = 0.01f;
     EvolutionParameters.CrossoverPst        = 0.7f;    
@@ -252,7 +252,7 @@ void TParameters::PrintAllParameters(){
     printf("Chromosome int size: %d\n", EvolutionParameters.ChromosomeSize);
     printf("Chromosome size:     %d\n", EvolutionParameters.ChromosomeSize * EvolutionParameters.IntBlockSize);
     
-    printf("Num of generations:  %d\n", EvolutionParameters.NumOfGenerations);
+    printf("Max Evaluations:  %d\n", EvolutionParameters.MaxEvaluations);
     printf("\n");
         
     

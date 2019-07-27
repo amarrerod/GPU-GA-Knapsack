@@ -79,10 +79,8 @@ TGPU_Evolution::TGPU_Evolution(){
             
     // Create statistics
     GPUStatistics = new TGPU_Statistics();
-
-    
     pActGeneration = 0;    
-    
+    performedEvaluations = 0;
     // Initialize Random seed
     InitSeed();
     
@@ -94,13 +92,9 @@ TGPU_Evolution::TGPU_Evolution(){
  * Destructor of the class
  */
 TGPU_Evolution::~TGPU_Evolution(){
-    
     delete MasterPopulation;    
     delete OffspringPopulation;
-            
     delete GPUStatistics;
-
-    
 }// end of Destructor
 //------------------------------------------------------------------------------
 
@@ -108,44 +102,26 @@ TGPU_Evolution::~TGPU_Evolution(){
  * Run Evolution
  */
 void TGPU_Evolution::Run(){
-    
     Initialize();
-            
     RunEvolutionCycle();        
-    
 }// end of Run
 //------------------------------------------------------------------------------
-
-
-//----------------------------------------------------------------------------//
-//                              Implementation                                //
-//                              protected methods                             //
-//----------------------------------------------------------------------------//
-
 
 /*
  * Initialize seed
  */
 void TGPU_Evolution::InitSeed() {
-
   struct timeval tp1;  
-  
-  gettimeofday(&tp1, NULL);
-  
-  pSeed = (tp1.tv_sec / (pDeviceIdx+1)) * tp1.tv_usec;
-  
+  gettimeofday(&tp1, NULL);  
+  pSeed = (tp1.tv_sec / (pDeviceIdx + 1)) * tp1.tv_usec;
 };// end of InitSeed
 //------------------------------------------------------------------------------
-    
-
-
 
 /*
  * Initialization of the GA
  */
 void TGPU_Evolution::Initialize(){
-    
-        
+           
     pActGeneration = 0;
         
     // Store parameters on GPU and print them out
@@ -172,9 +148,7 @@ void TGPU_Evolution::Initialize(){
     
     Threads.x = WARP_SIZE;
     Threads.y = CHR_PER_BLOCK;
-    Threads.z = 1;
-    
-        
+    Threads.z = 1;   
     
     // Calculate Knapsack fintess
     CalculateKnapsackFintess
@@ -190,10 +164,10 @@ void TGPU_Evolution::Initialize(){
 
 /*
  * Run evolutionary cycle for defined number of generations
- * 
+ *
+ * CHANGES: Run evolutionary cycle until reaching Max evaluations
  */
 void TGPU_Evolution::RunEvolutionCycle(){
-    
     
     dim3 Blocks;
     dim3 Threads;
@@ -201,13 +175,11 @@ void TGPU_Evolution::RunEvolutionCycle(){
     Threads.x = WARP_SIZE;
     Threads.y = CHR_PER_BLOCK;
     Threads.z = 1;
-    
-    
-    
+
     // Evaluate generations
-    for (pActGeneration = 1; pActGeneration < Params->NumOfGenerations(); pActGeneration++) {
-      
-      
+    //for (pActGeneration = 1; pActGeneration < Params->NumOfGenerations(); pActGeneration++) {
+    for(performedEvaluations = 0; performedEvaluations < Params->MaxEvaluations(); 
+        performedEvaluations += Params->PopulationSize()) {
           //-------------Selection -----------//
           Blocks.x = 1;    
           Blocks.y = (Params->OffspringPopulationSize() % (CHR_PER_BLOCK << 1)  == 0) ?
@@ -254,30 +226,22 @@ void TGPU_Evolution::RunEvolutionCycle(){
          CheckAndReportCudaError(__FILE__,__LINE__);
 
          
-          if (pActGeneration % Params->StatisticsInterval() == 0){
+          if (performedEvaluations % Params->StatisticsInterval() == 0){
               GPUStatistics->Calculate(MasterPopulation, Params->GetPrintBest());
              
-              printf("Generation %6d, MaxFitness %6f, MinFitness %6f, AvgFitness %6f, Diver %6f \n", 
-                      pActGeneration, GPUStatistics->HostData->MaxFitness, GPUStatistics->HostData->MinFitness,
+            /*   printf("Evaluations %6d, MaxFitness %6f, MinFitness %6f, AvgFitness %6f, Diver %6f \n", 
+              performedEvaluations, GPUStatistics->HostData->MaxFitness, GPUStatistics->HostData->MinFitness,
                                       GPUStatistics->HostData->AvgFitness, GPUStatistics->HostData->Divergence);
-              
-              if (Params->GetPrintBest())  printf("%s\n", GPUStatistics->GetBestIndividualStr(GlobalData.HostData).c_str());
-          }
-                  
-              
-                  
+               */
+              //if (Params->GetPrintBest())  printf("%s\n", GPUStatistics->GetBestIndividualStr(GlobalData.HostData).c_str());
+          }                 
     }
-        
-    
-    
                   
         GPUStatistics->Calculate(MasterPopulation, true);
         printf("------------------------------------------------------------------------------\n");
         printf("FinalMaxFitness %6f, FinalMinFitness %6f, FinalAvgFitness %6f, FinalDiver %6f \n", 
                 GPUStatistics->HostData->MaxFitness, GPUStatistics->HostData->MinFitness,
-                GPUStatistics->HostData->AvgFitness, GPUStatistics->HostData->Divergence);
-        printf("%s\n", GPUStatistics->GetBestIndividualStr(GlobalData.HostData).c_str());
-          
+                GPUStatistics->HostData->AvgFitness, GPUStatistics->HostData->Divergence);        
     
 }// end of RunEvolutionCycle
 //------------------------------------------------------------------------------
