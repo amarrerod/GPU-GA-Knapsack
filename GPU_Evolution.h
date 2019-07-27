@@ -29,8 +29,7 @@
 #ifndef TGPU_EVOLUTION_H
 #define TGPU_EVOLUTION_H
 
-#include <memory>
-#include <vector>
+#include <fstream>  // std::ofstream
 #include "GPU_Population.h"
 #include "GPU_Statistics.h"
 #include "GlobalKnapsackData.h"
@@ -71,9 +70,10 @@ class TGPU_Evolution {
   TGPU_Population* OffspringPopulation;  // Population of offsprings
 
   TGPU_Statistics* GPUStatistics;  // Statistics over GA process
-  std::vector<unique_ptr<TGPU_Statistics>> statistics;
 
   TGlobalKnapsackData GlobalData;  // Global data of knapsack
+
+  std::ofstream outputFile;
 
   // Initialize evolution
   void Initialize();

@@ -85,7 +85,7 @@ void TParameters::LoadParametersFromCommandLine(int argc, char **argv){
    char c;
 
    // Parse command line 
-   while ((c = getopt (argc, argv, "p:e:m:c:o:f:s:bh")) != -1){
+   while ((c = getopt (argc, argv, "p:e:r:x:m:c:o:f:s:bh:")) != -1){
        switch (c){
           case 'p':{              
               if (atoi(optarg) != 0) EvolutionParameters.PopulationSize = atoi(optarg);
@@ -95,8 +95,14 @@ void TParameters::LoadParametersFromCommandLine(int argc, char **argv){
               if (atoi(optarg) != 0) EvolutionParameters.MaxEvaluations = atoi(optarg);
               break;
           }
-  
-          
+          case 'r': {
+            if (atoi(optarg) != 0) repetitions = atoi(optarg);
+            break;
+        }
+        case 'x': {
+            outputFilename = optarg;
+            break;
+        }
           case 'm': {
               if (atof(optarg) != 0) EvolutionParameters.MutationPst = atof(optarg);              
               break;
@@ -109,9 +115,7 @@ void TParameters::LoadParametersFromCommandLine(int argc, char **argv){
               if (atof(optarg) != 0) OffspringPercentage = atof(optarg);;
               break;
           }
-         
-         
-          
+                  
          case 's': {
               if (atoi(optarg) != 0) EvolutionParameters.StatisticsInterval = atoi(optarg);
               break;
@@ -191,6 +195,8 @@ TParameters::TParameters(){
     
     FPrintBest                              = false;
     
+    // New parameters
+    repetitions = 10;
 }// end of TParameters
 //------------------------------------------------------------------------------
 
@@ -201,7 +207,7 @@ void TParameters::PrintUsageAndExit(){
     
   cerr << "Usage: " << endl;  
   cerr << "  -p Population_size\n";
-  cerr << "  -g Number_of_generations\n";
+  cerr << "  -e Max_evaluations\n";
   cerr << endl;
   
   cerr << "  -m mutation_rate\n";
@@ -215,6 +221,8 @@ void TParameters::PrintUsageAndExit(){
   cerr << "  -b print best individual\n";
   cerr << "  -f benchmark_file_name\n";
   
+  cerr << "  -x output_file_pattern\n";
+  cerr << "  -r repetitions\n";
           
   cerr << endl;
   cerr << "Default Population_size       = 128"  << endl;

@@ -168,7 +168,11 @@ void TGPU_Evolution::Initialize(){
  * CHANGES: Run evolutionary cycle until reaching Max evaluations
  */
 void TGPU_Evolution::RunEvolutionCycle(){
-    
+    outputFile.open(Params->OutputFilename());
+    if(!outputFile.is_open()){
+        cerr << "Error while trying to open: " << Params->OutputFilename() << endl;
+        exit(-1);
+    } 
     dim3 Blocks;
     dim3 Threads;
     
@@ -234,14 +238,15 @@ void TGPU_Evolution::RunEvolutionCycle(){
                                       GPUStatistics->HostData->AvgFitness, GPUStatistics->HostData->Divergence);
                */
               //if (Params->GetPrintBest())  printf("%s\n", GPUStatistics->GetBestIndividualStr(GlobalData.HostData).c_str());
+              outputFile << performedEvaluations << " " << GPUStatistics->HostData->MaxFitness << " ";
+              outputFile << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
           }                 
     }
                   
         GPUStatistics->Calculate(MasterPopulation, true);
-        printf("------------------------------------------------------------------------------\n");
-        printf("FinalMaxFitness %6f, FinalMinFitness %6f, FinalAvgFitness %6f, FinalDiver %6f \n", 
-                GPUStatistics->HostData->MaxFitness, GPUStatistics->HostData->MinFitness,
-                GPUStatistics->HostData->AvgFitness, GPUStatistics->HostData->Divergence);        
+        outputFile << performedEvaluations << " " << GPUStatistics->HostData->MaxFitness << " ";
+        outputFile << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
+        outputFile.close();
     
 }// end of RunEvolutionCycle
 //------------------------------------------------------------------------------
