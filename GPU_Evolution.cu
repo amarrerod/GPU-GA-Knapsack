@@ -126,6 +126,7 @@ void TGPU_Evolution::Initialize(){
         
     // Store parameters on GPU and print them out
     Params->StoreParamsOnGPU();
+    // Evitamos imprimir los parametros al iniciar
     Params->PrintAllParameters();
     
     // Set elements count
