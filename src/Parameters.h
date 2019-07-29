@@ -117,8 +117,6 @@ class TParameters {
 
   void SetOutputFileName(string& filename) { outputFilename = filename; };
 
-  int Repetitions() const { return repetitions; };
-
   // Get number of SM processors on the GPU
   int GetGPU_SM_Count() const { return FGPU_SM_Count; };
   // Set number of SM processors on the GPU
@@ -142,7 +140,6 @@ class TParameters {
 
   // Experiment parameters
   string outputFilename;
-  int repetitions;
   // print error message end exit if parameters are wrong
   void PrintUsageAndExit();
 

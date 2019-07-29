@@ -68,7 +68,8 @@ void TGlobalKnapsackData::LoadFromFile(){
     // Open file with benchmark data
     ifstream fr(Params->BenchmarkFileName().c_str());   
     if (!fr.is_open()) {
-        cerr << ERROR_FILE_NOT_FOUND << endl; 
+        cerr << ERROR_FILE_NOT_FOUND << endl;
+        cerr << Params->BenchmarkFileName().c_str() << endl; 
         exit(1);
     }
    

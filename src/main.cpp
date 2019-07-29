@@ -44,27 +44,19 @@ int main(int argc, char **argv) {
   TParameters *Params = TParameters::GetInstance();
   Params->LoadParametersFromCommandLine(argc, argv);
   string base = Params->OutputFilename();
+  // Create GPU evolution class
+  TGPU_Evolution GPU_Evolution;
 
-  for (int repetition = 0; repetition < Params->Repetitions(); repetition++) {
-    // Create GPU evolution class
-    // Cambiamos el nombre del fichero en cada repeticion
-    string repFilename = base + "." + to_string(repetition);
-    cout << "Running repetition: " << repetition << " of "
-         << Params->Repetitions() << endl;
-    Params->SetOutputFileName(repFilename);
-    TGPU_Evolution GPU_Evolution;
+  unsigned int AlgorithmStartTime;
+  AlgorithmStartTime = clock();
 
-    unsigned int AlgorithmStartTime;
-    AlgorithmStartTime = clock();
+  // Run evolution
+  GPU_Evolution.Run();
 
-    // Run evolution
-    GPU_Evolution.Run();
-
-    unsigned int AlgorithmStopTime = clock();
-    printf("Execution time: %0.3f s.\n",
-           (float)(AlgorithmStopTime - AlgorithmStartTime) /
-               (float)CLOCKS_PER_SEC);
-  }
+  unsigned int AlgorithmStopTime = clock();
+  printf(
+      "Execution time: %0.3f s.\n",
+      (float)(AlgorithmStopTime - AlgorithmStartTime) / (float)CLOCKS_PER_SEC);
   return 0;
 
 }  // end of main
