@@ -320,8 +320,6 @@ inline __device__ void CrossoverUniformFlip(TGene& GeneOffspring1, TGene& GeneOf
 }// end of CrossoverUniformFlip
 //------------------------------------------------------------------------------
 
-
-
 /*
  * BitFlip Mutation
  * Invert selected bit
@@ -346,6 +344,7 @@ inline __device__ void MutationBitFlip(TGene& GeneOffspring1, TGene& GeneOffspri
 }// end of MutationBitFlip
 //------------------------------------------------------------------------------
             
+
 
 //----------------------------------------------------------------------------//
 //                                Global Kernels                              //

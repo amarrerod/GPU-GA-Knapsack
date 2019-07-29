@@ -27,7 +27,7 @@ INSTANCE = "Instance Type"
 """
 
 
-def run_experiment(root_path, repetitions):
+def run_experiment(root_path, repetitions, pop_size, crossover, offspring_rate):
     for subdirectory, dirs, files in walk(root_path):
         files = [file for file in files if file.endswith(KP_EXT)]
         print(f"Directory: {subdirectory} with {len(files)} files")
@@ -37,10 +37,20 @@ def run_experiment(root_path, repetitions):
             for rep in range(repetitions):
                 print(f"{rep}/{repetitions} of {file}")
                 # Creamos los ficheros de resultados para cada repeticion
-                output_file = file[:-3] + f"_{rep}"
+                offspring_str = str(offspring_rate).replace(".", "_")
+                crossover_str = str(crossover).replace(".", "_")
+                output_file = file[:-3] + \
+                    f"_ps_{pop_size}_cr_{crossover_str}_ofs_{offspring_str}.{rep}"
+
                 full_path_to_file = join(root_path, subdirectory, file)
+                # Definimos la mutacion de manera dinamica en funcion del numero de elementos
+                mutation = [int(s) for s in file.split("_") if s.isdigit()][0]
+                mutation = 1 / mutation
                 subprocess.run(
-                    [GPU_KNAPSACK, "-f", f"{full_path_to_file}", "-p", "100", "-s", "100", "-x", f"{output_file}"], check=True)
+                    [GPU_KNAPSACK, "-f", f"{full_path_to_file}", "-p",
+                     f"{pop_size}", "-m", f"{mutation}", "-c", f"{crossover}",
+                     "-o", f"{offspring_rate}", "-s", "100", "-x",
+                     f"{output_file}"], check=True)
 
 
 """
@@ -91,16 +101,15 @@ def analyse_results(paths, patterns):
     pretty_table = PrettyTable(
         [INSTANCE, MAX_FITNESS, AVG_FITNESS, MIN_FITNESS])
     for path, pattern in zip(paths, patterns):
-        print(f"Pattern: {pattern}")
         files = [join(path, file) for file in listdir(path)]
+        print(f"Pattern: {pattern} - {len(files)} files")
+
         max_fitness = []
         avg_fitness = []
         min_fitness = []
         for filename in files:
             # Leemos y guardamos todas las columnas
             data = np.genfromtxt(filename, delimiter=" ")
-            if len(data) == 3344:
-                print(f"File: {filename}")
             max_fitness.append(data[:, 1])
             avg_fitness.append(data[:, 2])
             min_fitness.append(data[:, 3])
@@ -145,7 +154,11 @@ if __name__ == "__main__":
 
         repetitions = args.reps
         root_dir = args.root_dir
-        run_experiment(root_dir, repetitions)
+        pop_size = 100
+        crossover = 0.8
+        offspring_rate = 0.5
+        run_experiment(root_dir, repetitions, pop_size,
+                       crossover, offspring_rate)
 
     elif args.analyse:
         pattern = [
@@ -153,14 +166,14 @@ if __name__ == "__main__":
             r"100",
             r"500",
             r"1000",
-            r"2000"
+            r"5000"
         ]
         path = [
-            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/results/50",
-            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/results/100",
-            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/results/500",
-            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/results/1000",
-            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/results/2000"
+            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/50",
+            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/100",
+            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/500",
+            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/1000",
+            "/home/amarrero/Proyectos/GPU-GA-Knapsack/experiment/5000"
         ]
 
         results, evaluations = analyse_results(path, pattern)
