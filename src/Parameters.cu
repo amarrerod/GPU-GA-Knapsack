@@ -178,8 +178,8 @@ TParameters::TParameters(){
     
     EvolutionParameters.PopulationSize      = 128;
     EvolutionParameters.ChromosomeSize      = 32;
-    // Definido a 500K tras un experimento previo
-    EvolutionParameters.MaxEvaluations      = 500000;
+    // Definido a 400K tras un experimento previo
+    EvolutionParameters.MaxEvaluations      = 400000;
         
     EvolutionParameters.MutationPst         = 0.01f;
     EvolutionParameters.CrossoverPst        = 0.7f;    

@@ -1,12 +1,15 @@
 
 import argparse
 import subprocess
+import os
 from os import listdir, walk
 from os.path import isfile, join
 import numpy as np
 import matplotlib.pyplot as plt
 from pprint import pprint
 from prettytable import PrettyTable
+from zipfile import ZipFile
+import re
 
 """
     CONSTANTES
@@ -156,10 +159,23 @@ if __name__ == "__main__":
         root_dir = args.root_dir
         pop_size = 100
         crossover = 0.8
-        offspring_rate = 0.5
-        run_experiment(root_dir, repetitions, pop_size,
-                       crossover, offspring_rate)
+        offspring_rate = 0.2
+        # run_experiment(root_dir, repetitions, pop_size,
+        #              crossover, offspring_rate)
 
+        # Por ultimo guardamos los resultados dentro de un zip
+        cr_str = str(crossover).replace(".", "")
+        ofs_str = str(offspring_rate).replace(".", "")
+        experiment_name = f"GA_Popsize_{pop_size}_CR_{cr_str}_OFR_{ofs_str}.zip"
+        current_path = os.getcwd()
+        with ZipFile(experiment_name, "w") as zip_file:
+            files = [f for f in listdir(
+                current_path) if re.match(r"\w+\.\d$", f)]
+            print(f"Files: {len(files)}")
+            for file in files:
+                zip_file.write(file)
+
+    # Si no ejecutamos, analizamos los resultados
     elif args.analyse:
         pattern = [
             r"50",
