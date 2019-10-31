@@ -64,10 +64,19 @@ inline __device__ int  GetIndex(unsigned int ChromosomeIdx, unsigned int GeneIdx
 // Select an individual from a population
 inline __device__ int  Selection(TPopulationData * ParentsData, unsigned int Random1, unsigned int Random2);
 
+/**
+ *  Operadores de cruce añadidos por
+ *  Alejandro Marrero - alejandro.marrero.10@ull.edu.es
+ *  Octubre - 2019
+ */
+
+ inline __device__ void CrossoverOPC(TGene& GeneOffspring1, TGene&              GeneOffspring2, TGene GeneParent1, TGene GeneParent2, 
+    unsigned int RandomValue);
+
+
+
 // Perform Uniform Crossover
-inline __device__ void CrossoverUniformFlip(TGene& GeneOffspring1, TGene& GeneOffspring2,
-                                            TGene GeneParent1    , TGene GeneParent2,
-                                            unsigned int RandomValue);
+inline __device__ void CrossoverUniformFlip(TGene& GeneOffspring1, TGene& GeneOffspring2, TGene GeneParent1, TGene GeneParent2, int BitID);
 
 // Perform BitFlip mutation
 inline __device__ void MutationBitFlip(TGene& GeneOffspring1, TGene& GeneOffspring2,
@@ -319,6 +328,25 @@ inline __device__ void CrossoverUniformFlip(TGene& GeneOffspring1, TGene& GeneOf
     
 }// end of CrossoverUniformFlip
 //------------------------------------------------------------------------------
+
+
+
+/*
+ * One Point Crossover
+ * Flip one byte of parents to produce parents
+ * 
+ * @param       GeneOffspring1 - Returns first offspring (one gene)
+ * @param       GeneOffspring2 - Returns second offspring (one gene)
+ * @param       GeneParent1    - First parent (one gene)
+ * @param       GeneParent2    - Second parent (one gene)
+ * @param       BitID          - Bit to perform crossover
+ * 
+ */
+inline __device__ void CrossoverOPC(TGene& GeneOffspring1, TGene&              GeneOffspring2, TGene GeneParent1, TGene GeneParent2, int BitID){
+
+}
+
+
 
 /*
  * BitFlip Mutation

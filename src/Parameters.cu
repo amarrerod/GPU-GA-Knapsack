@@ -83,9 +83,21 @@ void TParameters::LoadParametersFromCommandLine(int argc, char **argv){
    // default values
    float OffspringPercentage = 0.5f;
    char c;
-
+   const int num_args = 8;
+   if (argc != num_args) {
+       std::cerr << "Error." << std::endl;
+       PrintUsageAndExit();
+   } else {
+       EvolutionParameters.PopulationSize = atoi(argv[1]);
+       EvolutionParameters.MaxEvaluations = atoi(argv[2]);
+       EvolutionParameters.MutationPst = atof(argv[3]);
+       EvolutionParameters.CrossoverPst = atof(argv[4]);
+       EvolutionParameters.StatisticsInterval = atoi(argv[5]);
+       outputFilename = argv[6];
+       GlobalDataFileName = argv[7];
+   }
    // Parse command line 
-   while ((c = getopt (argc, argv, "p:e:x:m:c:o:f:s:bh:")) != -1){
+/*    while ((c = getopt (argc, argv, "p:e:x:m:c:o:f:s:bh:")) != -1){
        switch (c){
           case 'p':{              
               if (atoi(optarg) != 0) EvolutionParameters.PopulationSize = atoi(optarg);
@@ -137,7 +149,7 @@ void TParameters::LoadParametersFromCommandLine(int argc, char **argv){
           }
        }    
    }   
-   
+    */
    // Set population size to be even.
    EvolutionParameters.OffspringPopulationSize = (int) (OffspringPercentage * EvolutionParameters.PopulationSize);
    if (EvolutionParameters.OffspringPopulationSize == 0) EvolutionParameters.OffspringPopulationSize = 2;
@@ -179,7 +191,7 @@ TParameters::TParameters(){
     EvolutionParameters.PopulationSize      = 128;
     EvolutionParameters.ChromosomeSize      = 32;
     // Definido a 400K tras un experimento previo
-    EvolutionParameters.MaxEvaluations      = 400000;
+    EvolutionParameters.MaxEvaluations      = 500000;
         
     EvolutionParameters.MutationPst         = 0.01f;
     EvolutionParameters.CrossoverPst        = 0.7f;    
@@ -201,24 +213,10 @@ TParameters::TParameters(){
  */
 void TParameters::PrintUsageAndExit(){
     
-  cerr << "Usage: " << endl;  
-  cerr << "  -p Population_size\n";
-  cerr << "  -e Max_evaluations\n";
-  cerr << endl;
-  
-  cerr << "  -m mutation_rate\n";
-  cerr << "  -c crossover_rate\n";
-  cerr << "  -o offspring_rate\n";
-  cerr << endl;
-  
-  cerr << "  -s statistics_interval\n";
-  cerr << endl;
-  
-  cerr << "  -b print best individual\n";
-  cerr << "  -f benchmark_file_name\n";
-  
-  cerr << "  -x output_file_pattern\n";
-          
+  cerr << "Usage: " << endl;
+  cerr << "./gpu_knapsack popsize max_evals mutation_rate cross_rate";
+  cerr << " stats_internal output_filename instance_filename" << endl;  
+
   cerr << endl;
   cerr << "Default Population_size       = 128"  << endl;
   cerr << "Default Number_of_generations = 100" << endl;
