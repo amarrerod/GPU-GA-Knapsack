@@ -1,11 +1,16 @@
 
-from os import walk, mkdir
-from os.path import isfile, join, exists
+import os
+from os import walk
+from os.path import isfile, join
 import subprocess
 import argparse
+import gzip
 
 GPU_KP = '/home/amarrero/Proyectos/GPU-GA-Knapsack/src/gpu_knapsack'
 KP_EXT = '.kp'
+GZIP = 'gzip'
+TAR = 'tar'
+TAR_ARGS = '-zcvf'
 
 
 def run_experiment(pop_size, cross_rate, evals, stats, reps, instance_path, results_path, verbose=False):
@@ -16,9 +21,10 @@ def run_experiment(pop_size, cross_rate, evals, stats, reps, instance_path, resu
     """
     # Creamos el directorio de salida si no existe
     cr_str = str(cross_rate).replace('.', '-')
-    config_name = f'{results_path}/GPU_KP_PS_{pop_size}_CR_{cr_str}_EVALS_{evals}_REPS_{reps}'
-    if not exists(config_name):
-        mkdir(config_name)
+    config_name = f'GPU_KP_PS_{pop_size}_CR_{cr_str}_EVALS_{evals}_REPS_{reps}'
+    final_dir = f'{results_path}/{config_name}'
+    if not os.path.exists(final_dir):
+        os.makedirs(final_dir)
 
     if verbose:
         print(f'Running experiment with configuration:\n')
@@ -42,13 +48,20 @@ def run_experiment(pop_size, cross_rate, evals, stats, reps, instance_path, resu
                 print(f'Instance: {file}')
             for rep in range(reps):
 
-                output_filename = config_name + "/" +  \
+                output_filename = final_dir + "/" +  \
                     file.split("/")[6][:-3] + f"_rep_{rep}.rs"
                 if verbose:
                     print(f'Output file: {output_filename}')
 
                 subprocess.run([GPU_KP, str(pop_size), str(evals),
                                 str(mut_rate), str(cross_rate), str(stats), output_filename, file])
+                # Tras cada ejecucion comprimimos el fichero resultante
+                # para ahorrar espacio en disco. Tras finalizar el experimento
+                # completo hacemos lo mismo con el directorio.
+                subprocess.run([GZIP, output_filename])
+
+    # Ahora comprimimos todo el directorio
+    subprocess.run([TAR, TAR_ARGS, f'{final_dir}.tar.gz', final_dir])
 
 
 if __name__ == '__main__':
