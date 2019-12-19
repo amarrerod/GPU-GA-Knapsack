@@ -1,8 +1,7 @@
 #!/usr/bin/env zsh
 
-# He ejecutado el 16 - 0.5 a mano --> Faltan las demas configuraciones
-pop_size=(16 32 64 128 256)
-cross_rate=(0.5 0.6 0.7 0.8 0.9 1.0)
+pop_size=(16 32 64 128)
+cross_rate=(0.7 0.8 0.9 1.0)
 max_evals=400000
 stats_interval=1000
 reps=10
