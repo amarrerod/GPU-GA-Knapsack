@@ -38,12 +38,11 @@ def run_experiment(pop_size, cross_rate, evals, stats, reps, instance_path, resu
 
     for root, _, files in walk(instance_path):
         for file in files:
-            if file.endswith(KP_EXT):
-                files.append(join(root, file))
-                file = join(root, file)
-                # Nos quedamos con el tamaño de la instancia (N)
-                # Y obtenemos la probabilidad de mutacion como 1 / N
-                mut_rate = float(1 / (int(file.split('_')[2])))
+
+            file = join(root, file)
+            # Nos quedamos con el tamaño de la instancia (N)
+            # Y obtenemos la probabilidad de mutacion como 1 / N
+            mut_rate = float(1 / (int(file.split('_')[2])))
             if verbose:
                 print(f'Instance: {file}')
             for rep in range(reps):
@@ -55,9 +54,9 @@ def run_experiment(pop_size, cross_rate, evals, stats, reps, instance_path, resu
 
                 subprocess.run([GPU_KP, str(pop_size), str(evals),
                                 str(mut_rate), str(cross_rate), str(stats), output_filename, file])
-                # Tras cada ejecucion comprimimos el fichero resultante
-                # para ahorrar espacio en disco. Tras finalizar el experimento
-                # completo hacemos lo mismo con el directorio.
+                # # Tras cada ejecucion comprimimos el fichero resultante
+                # # para ahorrar espacio en disco. Tras finalizar el experimento
+                # # completo hacemos lo mismo con el directorio.
                 subprocess.run([GZIP, output_filename])
 
     # Ahora comprimimos todo el directorio
