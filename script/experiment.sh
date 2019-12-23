@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 pop_size=(16 32 64 128)
-cross_rate=(0.7 0.8 0.9 1.0)
+cross_rate=(0.6 0.7 0.8 0.9)
 max_evals=400000
 stats_interval=1000
 reps=10

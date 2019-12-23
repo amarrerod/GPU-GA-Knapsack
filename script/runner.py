@@ -57,10 +57,10 @@ def run_experiment(pop_size, cross_rate, evals, stats, reps, instance_path, resu
                 # # Tras cada ejecucion comprimimos el fichero resultante
                 # # para ahorrar espacio en disco. Tras finalizar el experimento
                 # # completo hacemos lo mismo con el directorio.
-                subprocess.run([GZIP, output_filename])
+                #subprocess.run([GZIP, output_filename])
 
     # Ahora comprimimos todo el directorio
-    subprocess.run([TAR, TAR_ARGS, f'{final_dir}.tar.gz', final_dir])
+    #subprocess.run([TAR, TAR_ARGS, f'{final_dir}.tar.gz', final_dir])
 
 
 if __name__ == '__main__':
@@ -76,4 +76,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     run_experiment(args.population_size, args.crossover_rate, args.max_evals,
-                   args.stats_interval, args.repetitions, args.instances, args.results, verbose=True)
+                   args.stats_interval, args.repetitions, args.instances, args.results, verbose=False)
