@@ -238,7 +238,7 @@ void TGPU_Evolution::RunEvolutionCycle(){
               performedEvaluations, GPUStatistics->HostData->MaxFitness, GPUStatistics->HostData->MinFitness,
                                       GPUStatistics->HostData->AvgFitness, GPUStatistics->HostData->Divergence);
                */
-              //if (Params->GetPrintBest())  printf("%s\n", GPUStatistics->GetBestIndividualStr(GlobalData.HostData).c_str());
+            
               outputFile << performedEvaluations << " " << GPUStatistics->HostData->MaxFitness << " ";
               outputFile << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
           }                 
@@ -248,6 +248,7 @@ void TGPU_Evolution::RunEvolutionCycle(){
         outputFile << performedEvaluations << " " << GPUStatistics->HostData->MaxFitness << " ";
         outputFile << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
         outputFile.close();
+        cout << GPUStatistics->HostData->MaxFitness << " " << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
     
 }// end of RunEvolutionCycle
 //------------------------------------------------------------------------------
