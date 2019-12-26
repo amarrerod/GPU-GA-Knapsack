@@ -8,9 +8,6 @@ import gzip
 
 GPU_KP = '/home/amarrero/Proyectos/GPU-GA-Knapsack/src/gpu_knapsack'
 KP_EXT = '.kp'
-GZIP = 'gzip'
-TAR = 'tar'
-TAR_ARGS = '-zcvf'
 
 
 def run_experiment(pop_size, cross_rate, evals, stats, reps, instance_path, results_path, verbose=False):
