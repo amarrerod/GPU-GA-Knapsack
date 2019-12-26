@@ -48,7 +48,6 @@ int main(int argc, char **argv) {
   array<float, nCrossRates> crossRates = {0.6, 0.7, 0.8, 0.9};
   array<string, nCrossRates> crossRatesStr = {"0_6", "0_7", "0_8", "0_9"};
   int nEvaluations = 400000;
-  //float mutationRate = 0.01;
   // Definimos el path donde estan las instancias y buscamos todos los ficheros
   const fs::path pathToShow{"/home/amarrero/Proyectos/instances/"};
   auto start = chrono::high_resolution_clock::now();
@@ -83,6 +82,7 @@ int main(int argc, char **argv) {
           thread configThread(&execute, std::move(pThread), command.c_str());
           configThread.join();
           string results = pFuture.get();
+          cout << results << endl;
         }
       }
     }
