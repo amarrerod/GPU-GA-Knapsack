@@ -15,10 +15,14 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <tuple>
 #include <vector>
 
 using namespace std;
 namespace fs = std::filesystem;
+
+const string DEFAULT_PATH = "/home/amarrero/Proyectos/instances/";
+
 
 void execute(promise<string> &&thread, const char *command) {
   array<char, 128> buffer{};
@@ -46,15 +50,28 @@ int main(int argc, char **argv) {
   int repetitions = 10;
   array<int, nConfigurations> configurationsSizes = {16, 32, 64, 128};
   array<float, nCrossRates> crossRates = {0.6, 0.7, 0.8, 0.9};
-  array<string, nCrossRates> crossRatesStr = {"0_6", "0_7", "0_8", "0_9"};
   int nEvaluations = 400000;
+  // Creamos un array con las configuraciones de psize y crossRate para hacer
+  // mas sencillo el codigo mas abajo
+  vector<tuple<int, float>> configurations;
+  for (int i = 0; i < nConfigurations; i++) {
+    for (int j = 0; j < nCrossRates; j++) {
+      configurations.push_back(
+          make_tuple(configurationsSizes[i], crossRates[j]));
+    }
+  }
+
   // Definimos el path donde estan las instancias y buscamos todos los ficheros
-  const fs::path pathToShow{"/home/amarrero/Proyectos/instances/"};
+  const fs::path pathToShow{DEFAULT_PATH};
   auto start = chrono::high_resolution_clock::now();
   for (auto entry = fs::recursive_directory_iterator(pathToShow);
        entry != fs::recursive_directory_iterator(); ++entry) {
     auto filenameStr = entry->path().filename().string();
     if (!entry->is_regular_file()) continue;
+
+    // Los resultados de las configuraciones
+    // Tenemos los valores max, avg y min promedio de las repeticiones
+    vector<tuple<float, float, float>> configurationResults;
 
     // Calculamos la probabilidad de mutacion a partir del tamaño de la
     // instancia
@@ -66,26 +83,41 @@ int main(int argc, char **argv) {
     // Para cada fichero lanzamos todas las configuraciones que hemos
     // definido Repitiendo todas las veces que sean necesarias segun el
     // parametro repetitions
-    for (int i = 0; i < nConfigurations; i++) {
-      for (int j = 0; j < nCrossRates; j++) {
-        for (int rep = 0; rep < repetitions; rep++) {
-          string command =
-              "/home/amarrero/Proyectos/knapsack_instances/GPU-GA-Knapsack/src/"
-              "gpu_knapsack " +
-              to_string(configurationsSizes[i]) + " 400000 " +
-              to_string(mutationRate) + " " + to_string(crossRates[j]) +
-              " 1000 PGA_" + to_string(configurationsSizes[i]) + "_" +
-              crossRatesStr[j] + "_" + filenameStr + "_" + to_string(rep) +
-              ".rs" + " " + entry->path().string();
-          promise<string> pThread;
-          auto pFuture = pThread.get_future();
-          thread configThread(&execute, std::move(pThread), command.c_str());
-          configThread.join();
-          string results = pFuture.get();
-          cout << results << endl;
-        }
+
+    for (const tuple<int, float> &config : configurations) {
+      tuple<float, float, float> configResults = make_tuple(0.0, 0.0, 0.0);
+      for (int rep = 0; rep < repetitions; rep++) {
+        string command =
+            "/home/amarrero/Proyectos/knapsack_instances/GPU-GA-Knapsack/src/"
+            "gpu_knapsack " +
+            to_string(get<0>(config)) + " " + to_string(nEvaluations) + " " +
+            to_string(mutationRate) + " " + to_string(get<1>(config)) +
+            " 1000 PGA_" + to_string(get<0>(config)) + "_" +
+            to_string(get<1>(config)) + "_" + filenameStr + "_" +
+            to_string(rep) + ".rs" + " " + entry->path().string();
+        promise<string> pThread;
+        auto pFuture = pThread.get_future();
+        thread configThread(&execute, std::move(pThread), command.c_str());
+        configThread.join();
+        // Nos quedamos con los resultados del proceso y los guardamos en el
+        // array
+        string results = pFuture.get();
+        vector<string> resultsStr;
+        boost::split(resultsStr, results, [](char c) { return c == ' '; });
+        get<0>(configResults) = stof(resultsStr[0]);
+        get<1>(configResults) = stof(resultsStr[1]);
+        get<2>(configResults) = stof(resultsStr[2]);
       }
+      get<0>(configResults) /= repetitions;
+      get<1>(configResults) /= repetitions;
+      get<2>(configResults) /= repetitions;
+      configurationResults.push_back(configResults);
     }
+    // Mostramos la mejor configuracion para la instancia que estamos
+    // resolviendo
+    sort(configurationResults.begin(), configurationResults.end());
+    cout << "Best configuration found get: " << get<0>(configurationResults[0])
+         << endl;
   }
   auto end = chrono::high_resolution_clock::now();
   double elapseTime =
