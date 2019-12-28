@@ -101,9 +101,9 @@ TGPU_Evolution::~TGPU_Evolution(){
 /*
  * Run Evolution
  */
-void TGPU_Evolution::Run(){
+float TGPU_Evolution::Run(){
     Initialize();
-    RunEvolutionCycle();        
+    return RunEvolutionCycle();        
 }// end of Run
 //------------------------------------------------------------------------------
 
@@ -168,7 +168,7 @@ void TGPU_Evolution::Initialize(){
  *
  * CHANGES: Run evolutionary cycle until reaching Max evaluations
  */
-void TGPU_Evolution::RunEvolutionCycle(){
+float TGPU_Evolution::RunEvolutionCycle(){
     outputFile.open(Params->OutputFilename());
     if(!outputFile.is_open()){
         cerr << "Error while trying to open: " << Params->OutputFilename() << endl;
@@ -249,6 +249,6 @@ void TGPU_Evolution::RunEvolutionCycle(){
         outputFile << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
         outputFile.close();
         cout << GPUStatistics->HostData->MaxFitness << " " << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
-    
+    return GPUStatistics->HostData->MaxFitness;
 }// end of RunEvolutionCycle
 //------------------------------------------------------------------------------

@@ -78,7 +78,14 @@ class TParameters {
 
   // Parse command line and populate the class
   void LoadParametersFromCommandLine(int argc, char** argv);
-
+  // Metodo incluido para pasar los parametros desde dentro del programa
+  void LoadParameters(const int& popsize, const int& maxEvals,
+                      const float& mutationRate, const float& crossRate,
+                      const int& statsInterval, const string& filename,
+                      const string& instance);
+  void LoadParameters(const int& popsize, const int& maxEvals,
+                      const float& mutationRate, const float& crossRate,
+                      const int& statsInterval, const string& filename);
   // Store GA paremetrs in GPU cosntant memory
   void StoreParamsOnGPU();
 

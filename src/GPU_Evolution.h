@@ -56,7 +56,7 @@ class TGPU_Evolution {
   virtual ~TGPU_Evolution();
 
   // Run evolution
-  void Run();
+  float Run();
 
  protected:
   TParameters* Params;       // Parameters of evolution
@@ -79,7 +79,7 @@ class TGPU_Evolution {
   void Initialize();
 
   // Run evolution
-  void RunEvolutionCycle();
+  float RunEvolutionCycle();
 
   void InitSeed();
 

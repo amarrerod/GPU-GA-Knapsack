@@ -70,6 +70,50 @@ TParameters* TParameters::GetInstance(){
 }// end of TParameters::GetInstance
 //-----------------------------------------------------------------------------
 
+void TParameters::LoadParameters(const int& popsize, const int& maxEvals,
+    const float& mutationRate, const float& crossRate,
+    const int& statsInterval, const string& filename, const string& instance) {
+    float OffspringPercentage = 0.5f;
+    EvolutionParameters.PopulationSize = popsize;
+    EvolutionParameters.MaxEvaluations = maxEvals;
+    EvolutionParameters.MutationPst = mutationRate;
+    EvolutionParameters.CrossoverPst = crossRate;
+    EvolutionParameters.StatisticsInterval = statsInterval;
+    outputFilename = filename;
+    GlobalDataFileName = instance;
+    // Set population size to be even.
+   EvolutionParameters.OffspringPopulationSize = (int) (OffspringPercentage * EvolutionParameters.PopulationSize);
+   if (EvolutionParameters.OffspringPopulationSize == 0) EvolutionParameters.OffspringPopulationSize = 2;
+   if (EvolutionParameters.OffspringPopulationSize % 2 == 1) EvolutionParameters.OffspringPopulationSize++;
+   
+      
+   // Set UINT mutation threshold to faster comparison
+   EvolutionParameters.MutationUINTBoundary  = (unsigned int) ((float) UINT_MAX * EvolutionParameters.MutationPst);
+   EvolutionParameters.CrossoverUINTBoundary = (unsigned int) ((float) UINT_MAX * EvolutionParameters.CrossoverPst);
+   
+}
+void TParameters::LoadParameters(const int& popsize, const int& maxEvals,
+    const float& mutationRate, const float& crossRate,
+    const int& statsInterval, const string& filename) {
+    float OffspringPercentage = 0.5f;
+    EvolutionParameters.PopulationSize = popsize;
+    EvolutionParameters.MaxEvaluations = maxEvals;
+    EvolutionParameters.MutationPst = mutationRate;
+    EvolutionParameters.CrossoverPst = crossRate;
+    EvolutionParameters.StatisticsInterval = statsInterval;
+    outputFilename = filename;
+    // Set population size to be even.
+   EvolutionParameters.OffspringPopulationSize = (int) (OffspringPercentage * EvolutionParameters.PopulationSize);
+   if (EvolutionParameters.OffspringPopulationSize == 0) EvolutionParameters.OffspringPopulationSize = 2;
+   if (EvolutionParameters.OffspringPopulationSize % 2 == 1) EvolutionParameters.OffspringPopulationSize++;
+   
+      
+   // Set UINT mutation threshold to faster comparison
+   EvolutionParameters.MutationUINTBoundary  = (unsigned int) ((float) UINT_MAX * EvolutionParameters.MutationPst);
+   EvolutionParameters.CrossoverUINTBoundary = (unsigned int) ((float) UINT_MAX * EvolutionParameters.CrossoverPst);
+   
+}
+
 
 /*
  * Load parameters from command line
@@ -82,7 +126,6 @@ void TParameters::LoadParametersFromCommandLine(int argc, char **argv){
     
    // default values
    float OffspringPercentage = 0.5f;
-   char c;
    const int num_args = 8;
    if (argc != num_args) {
        std::cerr << "Error." << std::endl;
@@ -96,60 +139,7 @@ void TParameters::LoadParametersFromCommandLine(int argc, char **argv){
        outputFilename = argv[6];
        GlobalDataFileName = argv[7];
    }
-   // Parse command line 
-/*    while ((c = getopt (argc, argv, "p:e:x:m:c:o:f:s:bh:")) != -1){
-       switch (c){
-          case 'p':{              
-              if (atoi(optarg) != 0) EvolutionParameters.PopulationSize = atoi(optarg);
-              break;
-          }
-          case 'e': {
-              if (atoi(optarg) != 0) EvolutionParameters.MaxEvaluations = atoi(optarg);
-              break;
-          }
-        case 'x': {
-            outputFilename = optarg;
-            break;
-        }
-          case 'm': {
-              if (atof(optarg) != 0) EvolutionParameters.MutationPst = atof(optarg);              
-              break;
-          }
-          case 'c': {
-              if (atof(optarg) != 0) EvolutionParameters.CrossoverPst = atof(optarg);
-              break;
-          }
-          case 'o': {
-              if (atof(optarg) != 0) OffspringPercentage = atof(optarg);;
-              break;
-          }
-                  
-         case 's': {
-              if (atoi(optarg) != 0) EvolutionParameters.StatisticsInterval = atoi(optarg);
-              break;
-          }
 
-         case 'b': {
-              FPrintBest = true;
-              break;
-          }
-          
-         case 'f': {
-              GlobalDataFileName  = optarg;
-              break;
-          }
-          case 'h':{
-
-             PrintUsageAndExit();
-             break;        
-          }
-          default:{
-
-               PrintUsageAndExit();
-          }
-       }    
-   }   
-    */
    // Set population size to be even.
    EvolutionParameters.OffspringPopulationSize = (int) (OffspringPercentage * EvolutionParameters.PopulationSize);
    if (EvolutionParameters.OffspringPopulationSize == 0) EvolutionParameters.OffspringPopulationSize = 2;
