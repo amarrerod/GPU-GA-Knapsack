@@ -31,11 +31,15 @@
 #include <future>
 #include <iostream>
 #include <thread>
+#include <tuple>
 #include <vector>
 #include "GPU_Evolution.h"
 #include "Parameters.h"
 using namespace std;
 
+// Tupla que guarda el tamaño de poblacion, crossrate y resultado de la
+// ejecucion
+typedef tuple<int, float, future<float>> configuration;
 // Mutex para evitar errores de concurrencia al ejecutar el experimento
 std::mutex codeMutex;
 
@@ -73,7 +77,7 @@ int main(int argc, char** argv) {
       "/home/amarrero/Proyectos/instances/Uncorrelated/"
       "Uncorrelated_N_50_R_1000_1.kp";
 
-  vector<future<float>> futures;
+  vector<configuration> configurations;
   vector<thread> threadPool;
   for (int i = 0; i < nPopSizes; i++) {
     for (int j = 0; j < nCrossRates; j++) {
@@ -81,7 +85,8 @@ int main(int argc, char** argv) {
                                   to_string(popSizes[i]) + "_" +
                                   to_string(crossRates[j]) + ".rs";
       promise<float> promiseObject;
-      futures.push_back(promiseObject.get_future());
+      configurations.push_back(
+          make_tuple(popSizes[i], crossRates[j], promiseObject.get_future()));
       threadPool.push_back(thread(experiment, move(promiseObject), popSizes[i],
                                   0.05f, crossRates[j], maxEvals, statsInterval,
                                   experimentFilename, instance));
@@ -89,6 +94,9 @@ int main(int argc, char** argv) {
   }
   for (int i = 0; i < threadPool.size(); i++) {
     threadPool[i].join();
+    cout << "Configuration: " << get<0>(configurations[i]) << " "
+         << get<1>(configurations[i])
+         << " Result: " << get<2>(configurations[i]).get() << endl;
   }
   return 0;
 

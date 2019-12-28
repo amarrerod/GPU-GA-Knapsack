@@ -174,11 +174,6 @@ void TGPU_Evolution::Initialize(){
  * CHANGES: Run evolutionary cycle until reaching Max evaluations
  */
 float TGPU_Evolution::RunEvolutionCycle(){
-    outputFile.open(Params->OutputFilename());
-    if(!outputFile.is_open()){
-        cerr << "Error while trying to open: " << Params->OutputFilename() << endl;
-        exit(-1);
-    } 
     dim3 Blocks;
     dim3 Threads;
     
@@ -233,27 +228,10 @@ float TGPU_Evolution::RunEvolutionCycle(){
           ReplacementKernel
                   <<<Blocks, Threads>>>
                   (MasterPopulation->DeviceData, OffspringPopulation->DeviceData, GetSeed());
-         CheckAndReportCudaError(__FILE__,__LINE__);
-
-         
-          if (performedEvaluations % Params->StatisticsInterval() == 0){
-              GPUStatistics->Calculate(MasterPopulation, Params->GetPrintBest());
-             
-            /*   printf("Evaluations %6d, MaxFitness %6f, MinFitness %6f, AvgFitness %6f, Diver %6f \n", 
-              performedEvaluations, GPUStatistics->HostData->MaxFitness, GPUStatistics->HostData->MinFitness,
-                                      GPUStatistics->HostData->AvgFitness, GPUStatistics->HostData->Divergence);
-               */
-            
-              outputFile << performedEvaluations << " " << GPUStatistics->HostData->MaxFitness << " ";
-              outputFile << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
-          }                 
+         CheckAndReportCudaError(__FILE__,__LINE__);                
     }
                   
         GPUStatistics->Calculate(MasterPopulation, true);
-        outputFile << performedEvaluations << " " << GPUStatistics->HostData->MaxFitness << " ";
-        outputFile << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
-        outputFile.close();
-        cout << GPUStatistics->HostData->MaxFitness << " " << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
     return GPUStatistics->HostData->MaxFitness;
 }// end of RunEvolutionCycle
 //------------------------------------------------------------------------------
