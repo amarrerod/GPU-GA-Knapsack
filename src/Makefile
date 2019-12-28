@@ -42,8 +42,8 @@ CXXINCLUDE=-I/usr/local/cuda/include -I/usr/local/cuda/samples/common/inc
 
 all:		$(TARGET)	
 
-$(TARGET):	main.o CUDA_Kernels.o GPU_Statistics.o Parameters.o GPU_Population.o GPU_Evolution.o GlobalKnapsackData.o EvolutionaryInstance.o
-	$(CXX) $(LDFLAGS) main.o CUDA_Kernels.o GPU_Statistics.o Parameters.o GPU_Population.o GPU_Evolution.o GlobalKnapsackData.o   EvolutionaryInstance.o -lm -o $@ $(LIBS) 
+$(TARGET):	main.o CUDA_Kernels.o GPU_Statistics.o Parameters.o GPU_Population.o GPU_Evolution.o GlobalKnapsackData.o EvolutionaryInstance.o GAConfiguration.o
+	$(CXX) $(LDFLAGS) main.o CUDA_Kernels.o GPU_Statistics.o Parameters.o GPU_Population.o GPU_Evolution.o GlobalKnapsackData.o   EvolutionaryInstance.o GAConfiguration.o -lm -o $@ $(LIBS) 
 
 
 

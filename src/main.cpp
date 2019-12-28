@@ -26,45 +26,10 @@
  * Created on 30 March 2012, 00:00 PM
  */
 
-#include <stdio.h>
-#include <array>
-#include <future>
-#include <iostream>
-#include <thread>
-#include <tuple>
+#include "GAConfiguration.h"
 #include <vector>
-#include "EvolutionaryInstance.h"
-#include "GPU_Evolution.h"
-#include "Parameters.h"
-#include <memory>
+#include <array>
 using namespace std;
-
-// Tupla que guarda el tamaño de poblacion, crossrate y resultado de la
-// ejecucion
-typedef tuple<int, float, future<float>> configuration;
-// Mutex para evitar errores de concurrencia al ejecutar el experimento
-std::mutex codeMutex;
-
-void experiment(promise<float>&& promiseObject, const int popsize,
-                const float mutationRate, const float crossRate,
-                const int maxEvals, const int statsInterval,
-                const string filename,
-                unique_ptr<EvolutionaryKnapsackInstance> instance) {
-  // Load parameters
-  TParameters* Params = TParameters::GetInstance();
-  Params->LoadParameters(popsize, maxEvals, mutationRate, crossRate,
-                         statsInterval, filename);
-  // Create GPU evolution class
-  TGPU_Evolution GPU_Evolution(false, instance->getNumberOfItems(),
-                               instance->getCapacity(), instance->getProfits(),
-                               instance->getWeights());
-  unsigned int AlgorithmStartTime;
-  codeMutex.lock();
-  // Run evolution
-  float result = GPU_Evolution.Run();
-  codeMutex.unlock();
-  promiseObject.set_value(result);
-}
 
 /*
  * The main function
@@ -83,26 +48,21 @@ int main(int argc, char** argv) {
       make_unique<EvolutionaryKnapsackInstance>(50, 1000);
   cout << "Instance: " << endl << instance << endl;
 
-  vector<configuration> configurations;
-  vector<thread> threadPool;
+  vector<GAConfiguration*> configurations;
   for (int i = 0; i < nPopSizes; i++) {
     for (int j = 0; j < nCrossRates; j++) {
-      string experimentFilename = "testing_experiment_" +
-                                  to_string(popSizes[i]) + "_" +
-                                  to_string(crossRates[j]) + ".rs";
-      promise<float> promiseObject;
-      configurations.push_back(
-          make_tuple(popSizes[i], crossRates[j], promiseObject.get_future()));
-      threadPool.push_back(thread(experiment, move(promiseObject), popSizes[i],
-                                  0.05f, crossRates[j], maxEvals, statsInterval,
-                                  experimentFilename, instance->clone()));
+      GAConfiguration* config = new GAConfiguration(
+          popSizes[i], 0.05f, crossRates[j], maxEvals, statsInterval,
+          instance->clone());
+      configurations.push_back(config);
     }
   }
-  for (int i = 0; i < threadPool.size(); i++) {
-    threadPool[i].join();
-    cout << "Configuration: " << get<0>(configurations[i]) << " "
-         << get<1>(configurations[i])
-         << " Result: " << get<2>(configurations[i]).get() << endl;
+  for (int i = 0; i < configurations.size(); i++) {
+    configurations[i]->join();
+    cout << *configurations[i] << endl;
+  }
+  for(int i = 0; i < configurations.size(); i++) {
+    delete(configurations[i]);
   }
   return 0;
 
