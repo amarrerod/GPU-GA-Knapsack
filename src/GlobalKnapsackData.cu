@@ -123,8 +123,8 @@ void TGlobalKnapsackData::LoadFromFile(){
  * Metodo para cargar una instancia del problema de la mochila
  * desde el propio programa
  **/
-void TGlobalKnapsackData::LoadFromData(const int &nItems, const float &capacity,
-    const vector<int> &profits, const vector<float> &weights) {
+void TGlobalKnapsackData::LoadFromData(const int &nItems, const int &capacity,
+    const vector<int> &profits, const vector<int> &weights) {
     TParameters * Params = TParameters::GetInstance();
     int OriginalNumberOfItems = nItems;
     int NumberOfItems = nItems;

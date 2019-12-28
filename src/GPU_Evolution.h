@@ -51,8 +51,8 @@ class TGPU_Evolution {
  public:
   // Class constructor
   TGPU_Evolution(bool loadFromFile = true, const int& nItems = 0,
-                 const float& capacity = 0.0f, const vector<int>& profits = {},
-                 const vector<float>& weights = {});
+                 const int& capacity = 0, const vector<int>& profits = {},
+                 const vector<int>& weights = {});
 
   // Run evolution
   virtual ~TGPU_Evolution();

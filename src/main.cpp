@@ -33,8 +33,10 @@
 #include <thread>
 #include <tuple>
 #include <vector>
+#include "EvolutionaryInstance.h"
 #include "GPU_Evolution.h"
 #include "Parameters.h"
+#include <memory>
 using namespace std;
 
 // Tupla que guarda el tamaño de poblacion, crossrate y resultado de la
@@ -46,13 +48,16 @@ std::mutex codeMutex;
 void experiment(promise<float>&& promiseObject, const int popsize,
                 const float mutationRate, const float crossRate,
                 const int maxEvals, const int statsInterval,
-                const string filename, const string instance) {
+                const string filename,
+                unique_ptr<EvolutionaryKnapsackInstance> instance) {
   // Load parameters
   TParameters* Params = TParameters::GetInstance();
   Params->LoadParameters(popsize, maxEvals, mutationRate, crossRate,
-                         statsInterval, filename, instance);
+                         statsInterval, filename);
   // Create GPU evolution class
-  TGPU_Evolution GPU_Evolution(true);
+  TGPU_Evolution GPU_Evolution(false, instance->getNumberOfItems(),
+                               instance->getCapacity(), instance->getProfits(),
+                               instance->getWeights());
   unsigned int AlgorithmStartTime;
   codeMutex.lock();
   // Run evolution
@@ -73,9 +78,10 @@ int main(int argc, char** argv) {
   array<float, nCrossRates> crossRates = {0.6f, 0.7f, 0.8f, 0.9f};
   const int statsInterval = 1000;
   const int maxEvals = 200000;
-  const string instance =
-      "/home/amarrero/Proyectos/instances/Uncorrelated/"
-      "Uncorrelated_N_50_R_1000_1.kp";
+  // Creamos una instancia de pruebas
+  unique_ptr<EvolutionaryKnapsackInstance> instance =
+      make_unique<EvolutionaryKnapsackInstance>(50, 1000);
+  cout << "Instance: " << endl << instance << endl;
 
   vector<configuration> configurations;
   vector<thread> threadPool;
@@ -89,7 +95,7 @@ int main(int argc, char** argv) {
           make_tuple(popSizes[i], crossRates[j], promiseObject.get_future()));
       threadPool.push_back(thread(experiment, move(promiseObject), popSizes[i],
                                   0.05f, crossRates[j], maxEvals, statsInterval,
-                                  experimentFilename, instance));
+                                  experimentFilename, instance->clone()));
     }
   }
   for (int i = 0; i < threadPool.size(); i++) {

@@ -72,8 +72,8 @@ class TGlobalKnapsackData {
   // Load data from file
   void LoadFromFile();
   // Nuevo metodo para pasar una instancia generada en el programa
-  void LoadFromData(const int &nItems, const float &capacity,
-                    const vector<int> &profits, const vector<float> &weights);
+  void LoadFromData(const int &nItems, const int &capacity,
+                    const vector<int> &profits, const vector<int> &weights);
 
  protected:
   // Memory allocation and deallocation

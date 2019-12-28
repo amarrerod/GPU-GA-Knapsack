@@ -52,8 +52,8 @@ using namespace std;
  * Constructor of the class
  */
 TGPU_Evolution::TGPU_Evolution(bool LoadFromFile, const int& nItems,
-    const float& capacity, const vector<int>& profits,
-    const vector<float>& weights){
+    const int& capacity, const vector<int>& profits,
+    const vector<int>& weights){
     
     // Create parammeter class
     Params    = TParameters::GetInstance();

@@ -31,7 +31,7 @@
 # Environment
 CC=nvcc
 CXX=nvcc
-CXXFLAGS= -Xptxas=-v -m64 -O3  --device-c -std=c++11
+CXXFLAGS= -Xptxas=-v -m64 -O3  --device-c -std=c++14
 TARGET=gpu_knapsack
 LDFLAGS=
 
@@ -42,8 +42,8 @@ CXXINCLUDE=-I/usr/local/cuda/include -I/usr/local/cuda/samples/common/inc
 
 all:		$(TARGET)	
 
-$(TARGET):	main.o CUDA_Kernels.o GPU_Statistics.o Parameters.o GPU_Population.o GPU_Evolution.o GlobalKnapsackData.o
-	$(CXX) $(LDFLAGS) main.o CUDA_Kernels.o GPU_Statistics.o Parameters.o GPU_Population.o GPU_Evolution.o GlobalKnapsackData.o -lm -o $@ $(LIBS) 
+$(TARGET):	main.o CUDA_Kernels.o GPU_Statistics.o Parameters.o GPU_Population.o GPU_Evolution.o GlobalKnapsackData.o EvolutionaryInstance.o
+	$(CXX) $(LDFLAGS) main.o CUDA_Kernels.o GPU_Statistics.o Parameters.o GPU_Population.o GPU_Evolution.o GlobalKnapsackData.o   EvolutionaryInstance.o -lm -o $@ $(LIBS) 
 
 
 
