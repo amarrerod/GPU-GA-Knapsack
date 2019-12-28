@@ -31,7 +31,7 @@
 # Environment
 CC=nvcc
 CXX=nvcc
-CXXFLAGS= -Xptxas=-v -m64 -O3  --device-c
+CXXFLAGS= -Xptxas=-v -m64 -O3  --device-c -std=c++11
 TARGET=gpu_knapsack
 LDFLAGS=
 

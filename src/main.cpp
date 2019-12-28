@@ -28,17 +28,21 @@
 
 #include <stdio.h>
 #include <array>
+#include <future>
 #include <iostream>
-
+#include <thread>
+#include <vector>
 #include "GPU_Evolution.h"
 #include "Parameters.h"
-
 using namespace std;
 
-void experiment(const int& popsize, const float& mutationRate,
-                const float& crossRate, const int& maxEvals,
-                const int& statsInterval, const string& filename,
-                const string& instance) {
+// Mutex para evitar errores de concurrencia al ejecutar el experimento
+std::mutex codeMutex;
+
+void experiment(promise<float>&& promiseObject, const int popsize,
+                const float mutationRate, const float crossRate,
+                const int maxEvals, const int statsInterval,
+                const string filename, const string instance) {
   // Load parameters
   TParameters* Params = TParameters::GetInstance();
   Params->LoadParameters(popsize, maxEvals, mutationRate, crossRate,
@@ -46,14 +50,11 @@ void experiment(const int& popsize, const float& mutationRate,
   // Create GPU evolution class
   TGPU_Evolution GPU_Evolution;
   unsigned int AlgorithmStartTime;
-  AlgorithmStartTime = clock();
+  codeMutex.lock();
   // Run evolution
   float result = GPU_Evolution.Run();
-  unsigned int AlgorithmStopTime = clock();
-  cout << "Execution time: "
-       << (float)((AlgorithmStopTime - AlgorithmStartTime) /
-                  (float)CLOCKS_PER_SEC)
-       << " Result: " << result << endl;
+  codeMutex.unlock();
+  promiseObject.set_value(result);
 }
 
 /*
@@ -71,7 +72,24 @@ int main(int argc, char** argv) {
   const string instance =
       "/home/amarrero/Proyectos/instances/Uncorrelated/"
       "Uncorrelated_N_50_R_1000_1.kp";
-  experiment(16, 0.05, 0.8, 20000, 1000, "testing_experiment", instance);
+
+  vector<future<float>> futures;
+  vector<thread> threadPool;
+  for (int i = 0; i < nPopSizes; i++) {
+    for (int j = 0; j < nCrossRates; j++) {
+      string experimentFilename = "testing_experiment_" +
+                                  to_string(popSizes[i]) + "_" +
+                                  to_string(crossRates[j]) + ".rs";
+      promise<float> promiseObject;
+      futures.push_back(promiseObject.get_future());
+      threadPool.push_back(thread(experiment, move(promiseObject), popSizes[i],
+                                  0.05f, crossRates[j], maxEvals, statsInterval,
+                                  experimentFilename, instance));
+    }
+  }
+  for (int i = 0; i < threadPool.size(); i++) {
+    threadPool[i].join();
+  }
   return 0;
 
 }  // end of main
