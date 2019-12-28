@@ -51,7 +51,9 @@ using namespace std;
 /*
  * Constructor of the class
  */
-TGPU_Evolution::TGPU_Evolution(){
+TGPU_Evolution::TGPU_Evolution(bool LoadFromFile, const int& nItems,
+    const float& capacity, const vector<int>& profits,
+    const vector<float>& weights){
     
     // Create parammeter class
     Params    = TParameters::GetInstance();
@@ -71,8 +73,11 @@ TGPU_Evolution::TGPU_Evolution(){
     
     
     // Load data from file
-    GlobalData.LoadFromFile();
-    
+    if (LoadFromFile)
+        GlobalData.LoadFromFile();
+    else
+        GlobalData.LoadFromData(nItems, capacity, profits, weights);
+
     // Create populations on GPU
     MasterPopulation    = new TGPU_Population(Params->PopulationSize(), Params->ChromosomeSize());    
     OffspringPopulation = new TGPU_Population(Params->OffspringPopulationSize(), Params->ChromosomeSize());

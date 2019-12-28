@@ -48,7 +48,7 @@ void experiment(promise<float>&& promiseObject, const int popsize,
   Params->LoadParameters(popsize, maxEvals, mutationRate, crossRate,
                          statsInterval, filename, instance);
   // Create GPU evolution class
-  TGPU_Evolution GPU_Evolution;
+  TGPU_Evolution GPU_Evolution(true);
   unsigned int AlgorithmStartTime;
   codeMutex.lock();
   // Run evolution

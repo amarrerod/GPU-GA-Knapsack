@@ -118,6 +118,50 @@ void TGlobalKnapsackData::LoadFromFile(){
         
     
 }// end of LoadFromFile
+
+/**
+ * Metodo para cargar una instancia del problema de la mochila
+ * desde el propio programa
+ **/
+void TGlobalKnapsackData::LoadFromData(const int &nItems, const float &capacity,
+    const vector<int> &profits, const vector<float> &weights) {
+    TParameters * Params = TParameters::GetInstance();
+    int OriginalNumberOfItems = nItems;
+    int NumberOfItems = nItems;
+    // Calculate padding
+    int Overhead = nItems % (Params->IntBlockSize() * WARP_SIZE);
+    if (Overhead != 0) NumberOfItems = NumberOfItems + ((Params->IntBlockSize() * WARP_SIZE) - Overhead);
+    // Allocate memory for arrays
+    AllocateMemory(NumberOfItems);
+    HostData->NumberOfItems         = NumberOfItems;
+    HostData->OriginalNumberOfItems = OriginalNumberOfItems;
+    // Load profits
+    for (size_t i = 0; i < OriginalNumberOfItems; i++){
+        HostData->ItemPrice[i] = profits[i];
+        HostData->ItemWeight[i] = weights[i];                 
+    } // add padding
+    for (size_t i = OriginalNumberOfItems; i < NumberOfItems; i++){
+        HostData->ItemPrice[i] = TPriceType(0);
+        HostData->ItemWeight[i] = TPriceType(0);        
+    }
+    // Get max Price/Weight ratio
+    HostData->MaxPriceWightRatio = 0.0f;
+    for (size_t i = 0; i < OriginalNumberOfItems; i++){
+       if (HostData->ItemWeight[i] != 0) {
+                float Ratio = HostData->ItemPrice[i] / HostData->ItemWeight[i];
+                if (Ratio > HostData->MaxPriceWightRatio)  HostData->MaxPriceWightRatio = Ratio;
+       } 
+    }
+    //Store Knapsack capacity
+    HostData->KnapsackCapacity = capacity;
+    // Update chromosome size in parameters
+    Params->SetChromosomeSize(NumberOfItems / Params->IntBlockSize());
+    // Upload gloal data to device memory
+    UploadDataToDevice();
+}
+
+
+
 //------------------------------------------------------------------------------
 
     
