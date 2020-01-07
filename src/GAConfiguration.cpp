@@ -36,7 +36,6 @@ GAConfiguration::GAConfiguration(
       runElapsedTime(0.0f),
       runResult(0.0f) {
   evoInstance = instance->clone();
-  // futureObject = promiseObject.get_future();
   runThread = thread(&GAConfiguration::run, this);
 }
 
@@ -68,7 +67,5 @@ unique_ptr<GAConfiguration> GAConfiguration::clone() {
   copy->runElapsedTime = runElapsedTime;
   copy->statsInterval = statsInterval;
   copy->runThread = move(runThread);
-  // copy->futureObject = move(futureObject);
-  // copy->promiseObject = move(promiseObject);
   return copy;
 }

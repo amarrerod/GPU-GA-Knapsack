@@ -30,8 +30,6 @@ class GAConfiguration {
  private:
   // Controladores de la ejecucion
   thread runThread = {};
-  future<float> futureObject = {};
-  promise<float> promiseObject = {};
   float runResult;
   float runElapsedTime;
   // Parametros de la configuracion del algoritmo Genetico
