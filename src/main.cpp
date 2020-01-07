@@ -26,12 +26,11 @@
  * Created on 30 March 2012, 00:00 PM
  *
  *
- * Actualizado a 7 de enero de 2020
- * El código genera una instancia del problema de la mochila con unas ciertas
- * caracteristicas. Luego, resuelve dicha instancia para cada una de las
- * configuraciones lanzadas en paralelo.
- *
- *
+ * Actualizado a 7 de enero de 2020 --> Alejandro Marrero Díaz
+ *  -     El código genera una instancia del problema de la mochila con unas
+ *        ciertas caracteristicas.
+ * -      Luego, resuelve dicha instancia para cada una de las
+ *        configuraciones lanzadas en paralelo.
  *
  */
 
@@ -40,29 +39,29 @@
 #include "GAConfiguration.h"
 using namespace std;
 
-/*
- * The main function
- *
- * Actualizamos para considerar las repeticiones tambien
- */
 int main(int argc, char** argv) {
-  const int nPopSizes = 4;
-  const int nCrossRates = 4;
-  array<int, nPopSizes> popSizes = {16, 32, 64, 128};
+  // Constantes para definir el experimento
+  const int nPopSizes = 4;  // Numero de variaciones del parametro popsize
+  const int nCrossRates =
+      4;  // Numero de variaciones del parametro de crossrate
+  array<int, nPopSizes> popSizes = {16, 32, 64, 128};  // Popsizes
   array<float, nCrossRates> crossRates = {0.6f, 0.7f, 0.8f, 0.9f};
-  const int statsInterval = 1000;
-  const int maxEvals = 200000;
-  // Creamos una instancia de pruebas
-  unique_ptr<EvolutionaryKnapsackInstance> instance =
-      make_unique<EvolutionaryKnapsackInstance>(5000, 1000);
-  cout << "Instance: " << endl << instance << endl;
+  const int statsInterval = 1000;  // Intervalo para imprimir estadisticas
+  const int maxEvals = 200000;     // Evaluaciones a realizar por cada ejecucion
 
+  // Creamos una instancia de pruebas
+  const int nItems = 1000;
+  const int coeffRange = 1000;
+  unique_ptr<EvolutionaryKnapsackInstance> instance =
+      make_unique<EvolutionaryKnapsackInstance>(nItems, coeffRange);
+  cout << "Instancia generada: " << instance << endl;
+  
   vector<GAConfiguration*> configurations;
   for (int i = 0; i < nPopSizes; i++) {
     for (int j = 0; j < nCrossRates; j++) {
-      GAConfiguration* config =
-          new GAConfiguration(popSizes[i], 0.05f, crossRates[j], maxEvals,
-                              statsInterval, instance->clone());
+      GAConfiguration* config = new GAConfiguration(
+          popSizes[i], (1 / (float)nItems), crossRates[j], maxEvals,
+          statsInterval, instance->clone(), false, "");
       configurations.push_back(config);
     }
   }

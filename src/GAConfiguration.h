@@ -13,14 +13,14 @@
 
 using namespace std;
 
-
 class GAConfiguration {
  public:
   GAConfiguration() = default;
   GAConfiguration(const int& popSize, const float& mutationRate,
                   const float& crossRate, const int& maxEvals,
                   const int& statsInterval,
-                  unique_ptr<EvolutionaryKnapsackInstance> instance);
+                  unique_ptr<EvolutionaryKnapsackInstance> instance,
+                  const bool print, const string filename);
   virtual ~GAConfiguration() = default;
 
   void run();
@@ -38,6 +38,9 @@ class GAConfiguration {
   int statsInterval;
   float mutationRate;
   float crossRate;
+  // Flag y nombre del fichero de resultados si necesario
+  bool printToFile;
+  string filename;
   unique_ptr<EvolutionaryKnapsackInstance> evoInstance;
 
  public:

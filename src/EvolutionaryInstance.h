@@ -17,6 +17,10 @@
 using namespace std;
 using Random = effolkronium::random_static;
 
+/***
+ * Clase para representar una instancia del problema de la mochila
+ *
+ **/
 class EvolutionaryKnapsackInstance {
  public:
   EvolutionaryKnapsackInstance() = default;

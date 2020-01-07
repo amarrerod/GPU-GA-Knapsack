@@ -174,6 +174,14 @@ void TGPU_Evolution::Initialize(){
  * CHANGES: Run evolutionary cycle until reaching Max evaluations
  */
 float TGPU_Evolution::RunEvolutionCycle(){
+    // Abrimos el fichero de resultados en caso de que se haya especificado uno
+    if (Params->OutputFilename() != "") {
+        outputFile.open(Params->OutputFilename());
+        if(!outputFile.is_open()){
+            cerr << "Error while trying to open: " << Params->OutputFilename() << endl;
+            exit(-1);
+        } 
+    }   
     dim3 Blocks;
     dim3 Threads;
     
@@ -228,10 +236,18 @@ float TGPU_Evolution::RunEvolutionCycle(){
           ReplacementKernel
                   <<<Blocks, Threads>>>
                   (MasterPopulation->DeviceData, OffspringPopulation->DeviceData, GetSeed());
-         CheckAndReportCudaError(__FILE__,__LINE__);                
+         CheckAndReportCudaError(__FILE__,__LINE__);      
+         if ((Params->OutputFilename() != "") 
+         && (performedEvaluations % Params->StatisticsInterval() == 0)) {
+            GPUStatistics->Calculate(MasterPopulation, true);
+            outputFile << performedEvaluations << " " << GPUStatistics->HostData->MaxFitness << " ";
+            outputFile << GPUStatistics->HostData->AvgFitness << " " << GPUStatistics->HostData->MinFitness << endl;
+         }          
     }
-                  
-        GPUStatistics->Calculate(MasterPopulation, true);
+    if (Params->OutputFilename() != "" && outputFile.is_open()) {
+        outputFile.close();
+    }             
+    GPUStatistics->Calculate(MasterPopulation, true);
     return GPUStatistics->HostData->MaxFitness;
 }// end of RunEvolutionCycle
 //------------------------------------------------------------------------------
