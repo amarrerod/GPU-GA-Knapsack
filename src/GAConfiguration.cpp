@@ -70,9 +70,8 @@ ostream& operator<<(ostream& os, const GAConfiguration& config) {
   os << "Mutation Rate: " << config.mutationRate << endl;
   os << "Crossover Rate: " << config.crossRate << endl;
   os << "Max Evaluations: " << config.maxEvaluations << endl;
-  os << "Run result: " << config.runResult << endl;
+  os << "Max profit found: " << config.runResult << endl;
   os << "Elapsed Time: " << config.runElapsedTime << "s" << endl;
-  os << "Output File: " << config.filename << endl;
   os << "==================" << endl;
   return os;
 }

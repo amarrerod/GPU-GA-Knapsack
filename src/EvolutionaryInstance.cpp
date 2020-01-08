@@ -70,7 +70,7 @@ void EvolutionaryKnapsackInstance::computeCapacity() {
   int totalWeight = 0;
   for (int &w : weights) totalWeight += w;
 
-  capacity = static_cast<int>(totalWeight * 0.75);
+  capacity = static_cast<int>(totalWeight * 0.80);
 }
 
 /**

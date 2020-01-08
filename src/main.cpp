@@ -42,27 +42,28 @@ using namespace std;
 int main(int argc, char** argv) {
   // Constantes para definir el experimento
   const int nPopSizes = 4;  // Numero de variaciones del parametro popsize
-  const int nCrossRates =
-      4;  // Numero de variaciones del parametro de crossrate
+  const int nCrossRates = 4;
   array<int, nPopSizes> popSizes = {16, 32, 64, 128};  // Popsizes
   array<float, nCrossRates> crossRates = {0.6f, 0.7f, 0.8f, 0.9f};
   const int statsInterval = 1000;  // Intervalo para imprimir estadisticas
   const int maxEvals = 200000;     // Evaluaciones a realizar por cada ejecucion
-
+  const int maxReps = 1;
   // Creamos una instancia de pruebas
-  const int nItems = 1000;
+  const int nItems = 5000;
   const int coeffRange = 1000;
   unique_ptr<EvolutionaryKnapsackInstance> instance =
       make_unique<EvolutionaryKnapsackInstance>(nItems, coeffRange);
   cout << "Instancia generada: " << instance << endl;
-  
+
   vector<GAConfiguration*> configurations;
   for (int i = 0; i < nPopSizes; i++) {
     for (int j = 0; j < nCrossRates; j++) {
-      GAConfiguration* config = new GAConfiguration(
-          popSizes[i], (1 / (float)nItems), crossRates[j], maxEvals,
-          statsInterval, instance->clone(), false, "");
-      configurations.push_back(config);
+      for (int rep = 0; rep < maxReps; rep++) {
+        GAConfiguration* config = new GAConfiguration(
+            popSizes[i], (1 / (float)nItems), crossRates[j], maxEvals,
+            statsInterval, instance->clone(), false, "");
+        configurations.push_back(config);
+      }
     }
   }
   for (int i = 0; i < configurations.size(); i++) {
