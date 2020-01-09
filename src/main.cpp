@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
   const int maxEvals = 200000;     // Evaluaciones a realizar por cada ejecucion
   const int maxReps = 1;
   // Creamos una instancia de pruebas
-  const int nItems = 5000;
+  const int nItems = 50;
   const int coeffRange = 1000;
   unique_ptr<EvolutionaryKnapsackInstance> instance =
       make_unique<EvolutionaryKnapsackInstance>(nItems, coeffRange);
