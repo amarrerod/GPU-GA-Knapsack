@@ -33,11 +33,11 @@ CC=nvcc
 CXX=nvcc
 CXXFLAGS= -Xptxas=-v -m64 -O3  --device-c
 TARGET=gpu_knapsack
-LDFLAGS=
+LDFLAGS= --compiler-bindir /usr/bin/g++-8
 
 #----------------------------------------------------------------
 # CHANGE PATHS to CUDA!!
-CXXINCLUDE=-I/usr/local/cuda/include -I/usr/local/cuda/samples/common/inc
+CXXINCLUDE=-I/usr/local/cuda-10.1/include -I/usr/local/cuda-10.1/samples/common/inc
 #----------------------------------------------------------------
 
 all:		$(TARGET)	
@@ -48,10 +48,10 @@ $(TARGET):	main.o CUDA_Kernels.o GPU_Statistics.o Parameters.o GPU_Population.o 
 
 
 main.o : main.cpp
-	$(CXX) $(CXXFLAGS) -c main.cpp
+	$(CXX) $(LDFLAGS)  $(CXXFLAGS) -c main.cpp
 
 %.o : %.cu
-	$(CXX) $(CXXFLAGS) ${CXXINCLUDE} -c $<
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) ${CXXINCLUDE} -c $<
 
 
 # Clean Targets
